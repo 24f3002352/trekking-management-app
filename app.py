@@ -158,7 +158,7 @@ def admin_add_trek():
 @login_required
 def admin_edit_trek(id):
     if current_user.role != 'admin': return redirect(url_for('login_gate'))
-    trek = Trek.query.get_or_400(id)
+    trek = Trek.query.get_or_404(id)
     trek.title = request.form.get('title')
     trek.location = request.form.get('location')
     trek.difficulty = request.form.get('difficulty')
@@ -179,7 +179,7 @@ def admin_edit_trek(id):
 @login_required
 def admin_assign_staff(id):
     if current_user.role != 'admin': return redirect(url_for('login_gate'))
-    trek = Trek.query.get_or_400(id)
+    trek = Trek.query.get_or_404(id)
     trek.staff_id = request.form.get('staff_id') or None
     db.session.commit()
     flash('Personnel assignments reassigned successfully.', 'success')
@@ -189,7 +189,7 @@ def admin_assign_staff(id):
 @login_required
 def admin_toggle_status(id, action):
     if current_user.role != 'admin': return redirect(url_for('login_gate'))
-    target_account = User.query.get_or_400(id)
+    target_account = User.query.get_or_404(id)
     
     if action == 'approve': target_account.status = 'approved'
     elif action == 'blacklist': target_account.status = 'blacklisted'
@@ -216,7 +216,7 @@ def staff_dashboard():
 @login_required
 def staff_update_trek(id):
     if current_user.role != 'staff': return redirect(url_for('login_gate'))
-    trek = Trek.query.get_or_400(id)
+    trek = Trek.query.get_or_404(id)
     
     # Guard check: Ensure only assigned staff can manage a trek
     if trek.staff_id != current_user.id:
@@ -257,7 +257,7 @@ def user_dashboard():
 @login_required
 def user_book_trek(trek_id):
     if current_user.role != 'user': return redirect(url_for('login_gate'))
-    trek = Trek.query.get_or_400(trek_id)
+    trek = Trek.query.get_or_404(trek_id)
     
     # Rule Validation Safeguards
     if trek.status != 'Open':
@@ -289,7 +289,7 @@ def user_book_trek(trek_id):
 @login_required
 def user_cancel_booking(id):
     if current_user.role != 'user': return redirect(url_for('login_gate'))
-    booking = Booking.query.get_or_400(id)
+    booking = Booking.query.get_or_404(id)
     
     if booking.user_id != current_user.id:
         return redirect(url_for('user_dashboard'))
