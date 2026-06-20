@@ -90,8 +90,15 @@
                         <td>{{ s.name }}<br><small class="text-muted">{{ s.contact }}</small></td>
                         <td><span class="badge bg-dark">{{ s.status.upper() }}</span></td>
                         <td>
-                            <a href="{{ url_for('admin_toggle_status', id=s.id, action='approve') }}" class="btn btn-success btn-xs py-0 px-1">Approve</a>
-                            <a href="{{ url_for('admin_toggle_status', id=s.id, action='blacklist') }}" class="btn btn-danger btn-xs py-0 px-1">Blacklist</a>
+                            {% if s.status == 'pending' %}
+                                <a href="{{ url_for('admin_toggle_status', id=s.id, action='approve') }}" class="btn btn-success btn-xs py-0 px-1">Approve</a>
+                                <a href="{{ url_for('admin_toggle_status', id=s.id, action='blacklist') }}" class="btn btn-danger btn-xs py-0 px-1">Blacklist</a>
+                            {% elif s.status == 'approved' %}
+                                <a href="{{ url_for('admin_toggle_status', id=s.id, action='deactivate') }}" class="btn btn-warning btn-xs py-0 px-1 text-dark">Suspend</a>
+                                <a href="{{ url_for('admin_toggle_status', id=s.id, action='blacklist') }}" class="btn btn-danger btn-xs py-0 px-1">Blacklist</a>
+                            {% elif s.status == 'blacklisted' %}
+                                <a href="{{ url_for('admin_toggle_status', id=s.id, action='approve') }}" class="btn btn-outline-success btn-xs py-0 px-1">Unban</a>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
@@ -112,8 +119,11 @@
                         <td>{{ u.name }}<br><small class="text-muted">{{ u.contact }}</small></td>
                         <td><span class="badge bg-dark">{{ u.status.upper() }}</span></td>
                         <td>
-                            <a href="{{ url_for('admin_toggle_status', id=u.id, action='approve') }}" class="btn btn-outline-success btn-xs py-0 px-1">Unban</a>
-                            <a href="{{ url_for('admin_toggle_status', id=u.id, action='blacklist') }}" class="btn btn-danger btn-xs py-0 px-1">Blacklist</a>
+                            {% if u.status == 'blacklisted' %}
+                                <a href="{{ url_for('admin_toggle_status', id=u.id, action='approve') }}" class="btn btn-outline-success btn-xs py-0 px-1">Unban Account</a>
+                            {% else %}
+                                <a href="{{ url_for('admin_toggle_status', id=u.id, action='blacklist') }}" class="btn btn-danger btn-xs py-0 px-1">Blacklist User</a>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
