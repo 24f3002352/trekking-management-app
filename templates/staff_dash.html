@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-4">Operational Operations Workspace (Assigned Guides Terminal)</h2>
+
+<div class="card shadow-sm border-0 p-4 mb-4">
+    <h4 class="mb-3">Your Assigned Expeditions Inventory Checklist</h4>
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Expedition Target Parameters</th>
+                    <th>Date Timeline Parameters</th>
+                    <th>Booked Counts Capacity Status</th>
+                    <th>Current System State Status</th>
+                    <th>Actions Node Control</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for trek in treks %}
+                <tr>
+                    <td>
+                        <strong>{{ trek.title }}</strong><br>
+                        <small class="text-muted">Location: {{ trek.location }} | Grade: {{ trek.difficulty }}</small>
+                    </td>
+                    <td><small>{{ trek.start_date }} to {{ trek.end_date }} ({{ trek.duration }} Days)</small></td>
+                    <td>
+                        <span class="badge bg-secondary p-2">Slots Remaining: {{ trek.available_slots }} / {{ trek.total_slots }}</span>
+                    </td>
+                    <td><span class="badge bg-primary">{{ trek.status }}</span></td>
+                    <td>
+                        <form action="{{ url_for('staff_update_trek', id=trek.id) }}" method="POST" class="row g-2 align-items-center">
+                            <div class="col-auto">
+                                <select name="status" class="form-select form-select-sm">
+                                    <option value="Open" {% if trek.status == 'Open' %}selected{% endif %}>Open</option>
+                                    <option value="Closed" {% if trek.status == 'Closed' %}selected{% endif %}>Closed</option>
+                                    <option value="Started" {% if trek.status == 'Started' %}selected{% endif %}>Started</option>
+                                    <option value="Completed" {% if trek.status == 'Completed' %}selected{% endif %}>Completed</option>
+                                </select>
+                            </div>
+                            <div class="col-auto">
+                                <input type="number" name="available_slots" value="{{ trek.available_slots }}" class="form-control form-control-sm" style="width: 70px;" title="Modify slots count counter metric manually if matching changes occur">
+                            </div>
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-success btn-sm">Update</button>
+                            </div>
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="5" class="bg-light p-3">
+                        <div class="small">
+                            <strong>Participant Contact Roster for This Trek Event:</strong>
+                            <ol class="mt-1 mb-0">
+                                {% for b in trek.bookings if b.status == 'Booked' %}
+                                    <li>{{ b.trekker.name }} (Contact Details Line: {{ b.trekker.contact }}) - <span class="text-success font-monospace">Confirmed Base Ledger Row Record</span></li>
+                                {% else %}
+                                    <span class="text-muted italic small">No actively registered trekker participants have booked a slot for this route.</span>
+                                {% endfor %}
+                            </ol>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" class="text-center text-muted py-4">No active assignments are currently registered to your identity database rows.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

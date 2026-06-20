@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <h3 class="card-title text-center mb-4">Registration Terminal</h3>
+                <form action="{{ url_for('register_gate') }}" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Choose System Role Type</label>
+                        <select class="form-select" name="role" required>
+                            <option value="user">User (Trekker Participant)</option>
+                            <option value="staff">Trek Staff (Field Guide)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Username String (Unique Profile Key)</label>
+                        <input type="text" name="username" class="form-control" required placeholder="e.g. johndoe2026">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password Key</label>
+                        <input type="password" name="password" class="form-control" required placeholder="Minimum 6 characters">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Full Legal Name</label>
+                        <input type="text" name="name" class="form-control" required placeholder="John Doe">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Active Contact Line Details</label>
+                        <input type="text" name="contact" class="form-control" required placeholder="+91 XXXXX XXXXX">
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 py-2">Finalize Registration Submit</button>
+                </form>
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('login_gate') }}" class="text-decoration-none">&larr; Return to Sign In Gateway</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

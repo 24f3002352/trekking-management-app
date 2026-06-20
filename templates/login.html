@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card shadow-sm border-0 mt-5">
+            <div class="card-body p-4">
+                <h3 class="card-title text-center mb-4">Portal Verification Access</h3>
+                <form action="{{ url_for('login_gate') }}" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Username String ID</label>
+                        <input type="text" name="username" class="form-control" required placeholder="Enter unique ID string">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Password Key</label>
+                        <input type="password" name="password" class="form-control" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2">Log In</button>
+                </form>
+                <hr class="my-4">
+                <div class="text-center">
+                    <p class="mb-1 text-muted">Need a user or guide account profile?</p>
+                    <a href="{{ url_for('register_gate') }}" class="text-decoration-none">Create Account Portal &rarr;</a>
+                </div>
+            </div>
+        </div>
+        <div class="alert alert-warning text-center mt-4 border-0 font-monospace" style="font-size: 0.85rem;">
+            Default Master Admin Access Keys:<br>
+            <strong>Username:</strong> admin | <strong>Password:</strong> admin123
+        </div>
+    </div>
+</div>
+{% endblock %}

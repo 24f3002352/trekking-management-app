@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row g-4">
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 p-3 mb-3">
+            <h5>My Identity Profiles</h5>
+            <form action="{{ url_for('user_update_profile') }}" method="POST">
+                <div class="mb-2">
+                    <label class="form-label small">Display Name</label>
+                    <input type="text" name="name" value="{{ current_user.name }}" class="form-control form-control-sm" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small">Contact Line</label>
+                    <input type="text" name="contact" value="{{ current_user.contact }}" class="form-control form-control-sm" required>
+                </div>
+                <button type="submit" class="btn btn-sm btn-dark w-100">Update Profile</button>
+            </form>
+        </div>
+
+        <div class="card shadow-sm border-0 p-3">
+            <h5>Expedition Filter System</h5>
+            <form method="GET" action="{{ url_for('user_dashboard') }}">
+                <div class="mb-2">
+                    <label class="small">Search Name</label>
+                    <input type="text" name="search_title" class="form-control form-control-sm" placeholder="e.g. Manali">
+                </div>
+                <div class="mb-2">
+                    <label class="small">Difficulty</label>
+                    <select name="difficulty" class="form-select form-select-sm">
+                        <option value="">All Difficulties</option>
+                        <option value="Easy">Easy</option>
+                        <option value="Moderate">Moderate</option>
+                        <option value="Hard">Hard</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="small">Target Location String</label>
+                    <input type="text" name="location" class="form-control form-control-sm" placeholder="e.g. Himachal">
+                </div>
+                <button type="submit" class="btn btn-sm btn-primary w-100">Apply Filters</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        <h3 class="mb-3">Available Open Expeditions Log Catalog</h3>
+        <div class="row row-cols-1 row-cols-md-2 g-3 mb-4">
+            {% for trek in treks %}
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h5 class="card-title text-truncate">{{ trek.title }}</h5>
+                            <span class="badge bg-success">{{ trek.difficulty }}</span>
+                        </div>
+                        <p class="card-text text-muted small mb-2">📍 Target Area Geography: {{ trek.location }}</p>
+                        <ul class="list-unstyled small mb-3">
+                            <li>⏱️ <strong>Duration Timeline:</strong> {{ trek.duration }} Full Operational Days</li>
+                            <li>📅 <strong>Window Dates:</strong> {{ trek.start_date }} to {{ trek.end_date }}</li>
+                            <li>👥 <strong>Remaining Capacity Slots Availability Count:</strong> <span class="text-primary font-bold">{{ trek.available_slots }} left</span></li>
+                        </ul>
+                        <form action="{{ url_for('user_book_trek', trek_id=trek.id) }}" method="POST">
+                            <button type="submit" class="btn btn-sm btn-outline-primary w-100" {% if trek.available_slots <= 0 %}disabled{% endif %}>
+                                {% if trek.available_slots <= 0 %}Fully Booked Base Capacity{% else %}Secure Reservation Slot &rarr;{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-12"><div class="alert alert-light text-center border">No open trekking expeditions found matching your query configurations.</div></div>
+            {% endfor %}
+        </div>
+
+        <h3 class="mb-3">Your Booking Ledgers & Journey History</h3>
+        <div class="card shadow-sm border-0 p-3">
+            <div class="table-responsive">
+                <table class="table align-middle font-monospace" style="font-size:0.85rem;">
+                    <thead><tr><th>ID</th><th>Trek Target Title</th><th>Date Registered</th><th>Status Code</th><th>Actions Handlers</th></tr></thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                        <tr>
+                            <td>#{{ booking.id }}</td>
+                            <td><strong>{{ booking.trek_event.title }}</strong></td>
+                            <td>{{ booking.booking_date }}</td>
+                            <td>
+                                <span class="badge {% if booking.status == 'Booked' %}bg-success{% elif booking.status == 'Cancelled' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                    {{ booking.status.upper() }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if booking.status == 'Booked' %}
+                                <form action="{{ url_for('user_cancel_booking', id=booking.id) }}" method="POST" class="d-inline">
+                                    <button type="submit" class="btn btn-xs btn-outline-danger py-0 px-1" style="font-size:0.75rem;">Cancel Slot</button>
+                                </form>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="5" class="text-center text-muted py-3">No entry historical book data matches found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

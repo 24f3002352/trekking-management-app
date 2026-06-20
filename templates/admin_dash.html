@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-4">System Master Control Dashboard</h2>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3"><div class="p-3 bg-white shadow-sm rounded border-start border-primary border-4"><h5>Total Treks</h5><h2 class="text-primary">{{ t_treks }}</h2></div></div>
+    <div class="col-md-3"><div class="p-3 bg-white shadow-sm rounded border-start border-success border-4"><h5>Registered Trekkers</h5><h2 class="text-success">{{ t_users }}</h2></div></div>
+    <div class="col-md-3"><div class="p-3 bg-white shadow-sm rounded border-start border-info border-4"><h5>Trek Staff Field Guides</h5><h2 class="text-info">{{ t_staff }}</h2></div></div>
+    <div class="col-md-3"><div class="p-3 bg-white shadow-sm rounded border-start border-warning border-4"><h5>Total Log Bookings</h5><h2 class="text-warning">{{ t_bookings }}</h2></div></div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('admin_dashboard') }}" class="row g-2">
+            <div class="col-md-10">
+                <input type="text" name="search" value="{{ search_val }}" class="form-control" placeholder="Search parameters via matching Name string or unique Database Identity Node IDs...">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Execute Query</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 p-3">
+            <h4>Generate New Target Route</h4>
+            <form action="{{ url_for('admin_add_trek') }}" method="POST">
+                <div class="mb-2"><label class="form-label small">Trek Activity Title</label><input type="text" name="title" class="form-control form-control-sm" required></div>
+                <div class="mb-2"><label class="form-label small">Geographic Location Target</label><input type="text" name="location" class="form-control form-control-sm" required></div>
+                <div class="mb-2">
+                    <label class="form-label small">Difficulty Grading Scale</label>
+                    <select name="difficulty" class="form-select form-select-sm"><option value="Easy">Easy</option><option value="Moderate">Moderate</option><option value="Hard">Hard</option></select>
+                </div>
+                <div class="mb-2"><label class="form-label small">Duration Parameter (Days Count)</label><input type="number" name="duration" class="form-control form-control-sm" required></div>
+                <div class="mb-2"><label class="form-label small">Total Slot Capacities</label><input type="number" name="total_slots" class="form-control form-control-sm" required></div>
+                <div class="mb-2"><label class="form-label small">Launch Start Date Calendar</label><input type="date" name="start_date" class="form-control form-control-sm" required></div>
+                <div class="mb-3"><label class="form-label small">End Conclusion Date Calendar</label><input type="date" name="end_date" class="form-control form-control-sm" required></div>
+                <button type="submit" class="btn btn-success btn-sm w-100">Save Expedition Logs</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 p-3 mb-4">
+            <h4>Route Inventory Matrix</h4>
+            <div class="table-responsive">
+                <table class="table table-sm table-striped align-middle" style="font-size:0.9rem;">
+                    <thead><tr><th>ID</th><th>Title</th><th>Location</th><th>Difficulty</th><th>Slots</th><th>Status</th><th>Assign Guide</th></tr></thead>
+                    <tbody>
+                        {% for trek in treks %}
+                        <tr>
+                            <td>{{ trek.id }}</td>
+                            <td><strong>{{ trek.title }}</strong></td>
+                            <td>{{ trek.location }}</td>
+                            <td><span class="badge bg-secondary">{{ trek.difficulty }}</span></td>
+                            <td>{{ trek.available_slots }}/{{ trek.total_slots }}</td>
+                            <td><span class="badge bg-info text-dark">{{ trek.status }}</span></td>
+                            <td>
+                                <form action="{{ url_for('admin_assign_staff', id=trek.id) }}" method="POST" class="d-flex g-1">
+                                    <select name="staff_id" class="form-select form-select-sm me-1">
+                                        <option value="">None Assigned</option>
+                                        {% for s in staff_members if s.status == 'approved' %}
+                                            <option value="{{ s.id }}" {% if trek.staff_id == s.id %}selected{% endif %}>{{ s.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="submit" class="btn btn-dark btn-sm p-1">Save</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 p-3">
+            <h4>Guide Verification System Logs</h4>
+            <table class="table table-sm align-middle" style="font-size:0.85rem;">
+                <thead><tr><th>ID</th><th>Name</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody>
+                    {% for s in staff_members %}
+                    <tr>
+                        <td>{{ s.id }}</td>
+                        <td>{{ s.name }}<br><small class="text-muted">{{ s.contact }}</small></td>
+                        <td><span class="badge bg-dark">{{ s.status.upper() }}</span></td>
+                        <td>
+                            <a href="{{ url_for('admin_toggle_status', id=s.id, action='approve') }}" class="btn btn-success btn-xs py-0 px-1">Approve</a>
+                            <a href="{{ url_for('admin_toggle_status', id=s.id, action='blacklist') }}" class="btn btn-danger btn-xs py-0 px-1">Blacklist</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 p-3">
+            <h4>Registered Trekker Registry Management</h4>
+            <table class="table table-sm align-middle" style="font-size:0.85rem;">
+                <thead><tr><th>ID</th><th>Name</th><th>State</th><th>Actions</th></tr></thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr>
+                        <td>{{ u.id }}</td>
+                        <td>{{ u.name }}<br><small class="text-muted">{{ u.contact }}</small></td>
+                        <td><span class="badge bg-dark">{{ u.status.upper() }}</span></td>
+                        <td>
+                            <a href="{{ url_for('admin_toggle_status', id=u.id, action='approve') }}" class="btn btn-outline-success btn-xs py-0 px-1">Unban</a>
+                            <a href="{{ url_for('admin_toggle_status', id=u.id, action='blacklist') }}" class="btn btn-danger btn-xs py-0 px-1">Blacklist</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
