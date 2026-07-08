@@ -11,12 +11,12 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(256), nullable=False)
     name = db.Column(db.String(100), nullable=False)
     contact = db.Column(db.String(20), nullable=True)
-    # Roles allowed: 'admin', 'staff', 'user'
+    # Roles allowed
     role = db.Column(db.String(20), nullable=False, default='user')
-    # Status allowed: 'pending', 'approved', 'blacklisted'
+    # Status allowed
     status = db.Column(db.String(20), nullable=False, default='approved')
 
-    # Relationships
+    
     bookings = db.relationship('Booking', backref='trekker', lazy=True)
     assigned_treks = db.relationship('Trek', backref='guide', lazy=True)
 
@@ -31,7 +31,7 @@ class Trek(db.Model):
     available_slots = db.Column(db.Integer, nullable=False)
     start_date = db.Column(db.String(50), nullable=False)
     end_date = db.Column(db.String(50), nullable=False)
-    # Status: Pending, Approved, Open, Closed, Completed
+    
     status = db.Column(db.String(20), nullable=False, default='Open')
     staff_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
 
