@@ -22,9 +22,7 @@ login_manager.login_view = 'login_gate'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# ==========================================
-# 1. CORE AUTHENTICATION ROUTES
-# ==========================================
+## CORE AUTHENTICATION ROUTES
 
 @app.route('/')
 def index_redirect():
@@ -69,11 +67,11 @@ def register_gate():
             flash('Username is currently taken by another account registration.', 'danger')
             return redirect(url_for('register_gate'))
             
-        # Admin accounts are explicitly banned from self-register templates
+        
         if role not in ['user', 'staff']:
             role = 'user'
             
-        # Staff accounts are initialized with a 'pending' state until verified by an Admin
+        # Staff accounts 
         initial_status = 'pending' if role == 'staff' else 'approved'
         hashed_pw = generate_password_hash(password, method='scrypt')
         
@@ -99,26 +97,23 @@ def logout_portal():
     flash('Secure logout completed successfully.', 'success')
     return redirect(url_for('login_gate'))
 
-# ==========================================
-# 2. ADMINISTRATIVE PORTAL ROUTING Matrix
-# ==========================================
+##ADMINISTRATIVE PORTAL ROUTING Matrix
+
 
 @app.route('/admin/dashboard')
 @login_required
 def admin_dashboard():
     if current_user.role != 'admin': return redirect(url_for('login_gate'))
     
-    # Text-based Global Search Logic Implementation
+    #Global Search Logic
     search_query = request.args.get('search', '').strip()
     
-    # Native analytical metric operations counters
     total_treks = Trek.query.count()
     total_users = User.query.filter_by(role='user').count()
     total_staff = User.query.filter_by(role='staff').count()
     total_bookings = Booking.query.count()
     
     if search_query:
-        # Check against name patterns or ID parameters matches dynamically
         treks_list = Trek.query.filter((Trek.title.like(f"%{search_query}%")) | (Trek.id == search_query)).all()
         users_list = User.query.filter((User.role == 'user') & ((User.name.like(f"%{search_query}%")) | (User.id == search_query))).all()
         staff_list = User.query.filter((User.role == 'staff') & ((User.name.like(f"%{search_query}%")) | (User.id == search_query))).all()
@@ -165,7 +160,7 @@ def admin_edit_trek(id):
     trek.duration = int(request.form.get('duration'))
     trek.status = request.form.get('status')
     
-    # Readjust availability constraints safely
+    # Readjust availability #
     slots = int(request.form.get('total_slots'))
     diff = slots - trek.total_slots
     trek.total_slots = slots
@@ -199,9 +194,7 @@ def admin_toggle_status(id, action):
     flash(f'Account state parameter adjusted to: {target_account.status.upper()}', 'info')
     return redirect(url_for('admin_dashboard'))
 
-# ==========================================
-# 3. EXPEDITION STAFF FIELD OPERATIONS
-# ==========================================
+#EXPEDITION STAFF FIELD
 
 @app.route('/staff/dashboard')
 @login_required
@@ -218,7 +211,7 @@ def staff_update_trek(id):
     if current_user.role != 'staff': return redirect(url_for('login_gate'))
     trek = Trek.query.get_or_404(id)
     
-    # Guard check: Ensure only assigned staff can manage a trek
+    # onlt the assigned staff can manage a trek
     if trek.staff_id != current_user.id:
         flash('Access Denied: You are not assigned as the operational manager for this trek entry.', 'danger')
         return redirect(url_for('staff_dashboard'))
@@ -229,16 +222,14 @@ def staff_update_trek(id):
     flash('Logistical operational data updated.', 'success')
     return redirect(url_for('staff_dashboard'))
 
-# ==========================================
-# 4. TREKKER CLIENT USER SPACE
-# ==========================================
+# TREKKER CLIENT USER
 
 @app.route('/user/dashboard')
 @login_required
 def user_dashboard():
     if current_user.role != 'user': return redirect(url_for('login_gate'))
     
-    # Query logic filter definitions
+    # Query logic filter
     diff_filter = request.args.get('difficulty', '').strip()
     loc_filter = request.args.get('location', '').strip()
     search_title = request.args.get('search_title', '').strip()
@@ -259,7 +250,7 @@ def user_book_trek(trek_id):
     if current_user.role != 'user': return redirect(url_for('login_gate'))
     trek = Trek.query.get_or_404(trek_id)
     
-    # Rule Validation Safeguards
+    
     if trek.status != 'Open':
         flash('Booking rejected: Registration operations for this activity are currently closed.', 'danger')
         return redirect(url_for('user_dashboard'))
@@ -273,7 +264,7 @@ def user_book_trek(trek_id):
         flash('You have already reserved a slot for this trek.', 'warning')
         return redirect(url_for('user_dashboard'))
         
-    # Transaction Processing
+    # Processing
     trek.available_slots -= 1
     new_booking = Booking(
         user_id=current_user.id,
@@ -313,8 +304,5 @@ def user_update_profile():
     flash('Your identity verification contact profile parameters were saved.', 'success')
     return redirect(url_for('user_dashboard'))
 
-# ==========================================
-# SYSTEM ENGINE EXECUTION WRAPPER
-# ==========================================
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
